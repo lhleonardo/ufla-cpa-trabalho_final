@@ -1,7 +1,7 @@
 #include <iostream>
-#include <cmath>
 
-using namespace std;
+#ifndef NODE_CPP
+#define NODE_CPP
 
 template <class Data>
 class Node {
@@ -22,8 +22,30 @@ class Node {
         Data getValue();
         void setValue(Data value);
     
-        void printNode(string location);
+        void printNode(std::string location);
 };
+
+template <class Data>
+class NodeRoot {
+    private:
+        Node<Data>* _next;
+        Data _value;
+    public:
+        NodeRoot(Data value, Node<Data>* next);
+        ~NodeRoot();
+
+        void setValue(Data value);
+        void setNext(Node<Data>* next);
+        
+        Data getValue();
+        Node<Data>* getNext();
+
+        NodeRoot<Data>* merge(NodeRoot<Data>* another);
+
+        void printNodeRoot();
+};
+
+#endif
 
 template <class Data>
 Node<Data>::Node(Data value) {
@@ -70,8 +92,8 @@ void Node<Data>::setValue(Data value) {
 }
 
 template <class Data>
-void Node<Data>::printNode(string location){
-    cout << "(" << this->_value << ", " << location << ") ";
+void Node<Data>::printNode(std::string location){
+    std::cout << "(" << this->_value << ", " << location << ") ";
     if (this->_left)
         this->_left->printNode("D");
     
@@ -79,26 +101,6 @@ void Node<Data>::printNode(string location){
         this->_right->printNode("E");
     
 }
-
-template <class Data>
-class NodeRoot {
-    private:
-        Node<Data>* _next;
-        Data _value;
-    public:
-        NodeRoot(Data value, Node<Data>* next);
-        ~NodeRoot();
-
-        void setValue(Data value);
-        void setNext(Node<Data>* next);
-        
-        Data getValue();
-        Node<Data>* getNext();
-
-        NodeRoot<Data>* merge(NodeRoot<Data>* another);
-
-        void printNodeRoot();
-};
 
 template<class Data>
 NodeRoot<Data>::NodeRoot(Data value, Node<Data>* next) {
@@ -146,92 +148,8 @@ NodeRoot<Data>* NodeRoot<Data>::merge(NodeRoot<Data>* another) {
 
 template <class Data>
 void NodeRoot<Data>::printNodeRoot(){
-    cout<< "(" << this->_value << ", Rr) ";
+    std::cout<< "(" << this->_value << ", Rr) ";
     if(this->_next != nullptr){
         this->_next->printNode("R");
     }
 }
-
-template <class Data> 
-class Bag {
-    private:
-        NodeRoot<Data>** _backbone;
-        unsigned _lengthBackbone;
-        unsigned _size;
-    public: 
-        Bag(unsigned size);
-        ~Bag();
-
-        void insert(Data value);
-        void print();
-
-};
-
-template <class Data>
-Bag<Data>::~Bag() {
-    for (unsigned i = 0; i < this->_lengthBackbone; i++) {
-        delete _backbone[i];
-    }
-
-    delete[] _backbone;
-}
-
-template<class Data>
-Bag<Data>::Bag(unsigned size) {
-    this->_size = size;
-    this->_lengthBackbone = ceil(log2(this->_size)) + 1;
-
-    this->_backbone = new NodeRoot<Data>*[this->_lengthBackbone];
-
-    for (unsigned i = 0; i < this->_lengthBackbone; i++)
-        this->_backbone[i] = nullptr;
-}
-
-template<class Data>
-void Bag<Data>::insert(Data value) {
-    NodeRoot<Data>* newValue = new NodeRoot<Data>(value, nullptr);
-
-    for(unsigned i = 0; i < this->_lengthBackbone; i++) {
-        if (this->_backbone[i] == nullptr) {
-            this->_backbone[i] = newValue;
-            break;
-        } else {
-            NodeRoot<Data>* temp = this->_backbone[i]->merge(newValue);
-            
-            newValue->setNext(nullptr);
-            delete newValue;
-
-            newValue = temp;
-
-            this->_backbone[i] = nullptr;
-        }
-    }
-}
-
-template<class Data>
-void Bag<Data>::print(){
- 
-    for(unsigned i=0; i < this->_lengthBackbone; i++){
-        cout << "[" << i << "] => ";
-        if(this->_backbone[i]!=nullptr){
-            this->_backbone[i]->printNodeRoot();
-            cout << endl;
-        } else {
-            cout << "NULL" << endl;
-        }
-    }
-}
-
-
-
-int main() {
-
-    Bag<int> umaBag(64);
-    for(int i=0; i<64; i++){
-        umaBag.insert(i);
-        umaBag.print();
-    }
-
-    return 0;
-}
-
