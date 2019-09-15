@@ -11,6 +11,7 @@ class Node {
         Data _value;
     public:
         Node(Data value);
+        ~Node();
         
         void setLeftNode(Node<Data>* left);
         void setRightNode(Node<Data>* right);
@@ -30,6 +31,12 @@ Node<Data>::Node(Data value) {
     this->_left = nullptr;
     this->_right = nullptr;
 
+}
+
+template <class Data>
+Node<Data>::~Node() {
+    delete this->_left;
+    delete this->_right;
 }
 
 template <class Data>
@@ -80,6 +87,7 @@ class NodeRoot {
         Data _value;
     public:
         NodeRoot(Data value, Node<Data>* next);
+        ~NodeRoot();
 
         void setValue(Data value);
         void setNext(Node<Data>* next);
@@ -96,6 +104,11 @@ template<class Data>
 NodeRoot<Data>::NodeRoot(Data value, Node<Data>* next) {
     this->_next = next;
     this->_value = value;
+}
+
+template <class Data>
+NodeRoot<Data>::~NodeRoot() {
+    delete this->_next;
 }
 
 template<class Data>
@@ -183,7 +196,13 @@ void Bag<Data>::insert(Data value) {
             this->_backbone[i] = newValue;
             break;
         } else {
-            newValue = this->_backbone[i]->merge(newValue);
+            NodeRoot<Data>* temp = this->_backbone[i]->merge(newValue);
+            
+            newValue->setNext(nullptr);
+            delete newValue;
+
+            newValue = temp;
+
             this->_backbone[i] = nullptr;
         }
     }
