@@ -8,24 +8,30 @@ using namespace std;
 template<class Data>
 class Vertex{
     private:
-        Data _value;
+        const Data _value;
 
         int _distance;
+
+        bool _visited;
     public:
 
-        Vertex(Data& value);
+        Vertex(const Data value);
 
         Data getValue();
-        void setValue(Data& value);
+        void setValue(const Data value);
 
         int getDistance();
         void setDistance(int distance);
+
+        bool isVisited();
+
+        void visited();
 };
 
 #endif
 
 template <class Data>
-Vertex<Data>::Vertex(Data& value) {
+Vertex<Data>::Vertex(const Data value) {
     this->_value = value;
     this->_distance = -1;
 }
@@ -36,7 +42,7 @@ Data Vertex<Data>:: getValue(){
 }
 
 template<class Data>
-void Vertex<Data> :: setValue(Data& value){
+void Vertex<Data> :: setValue(const Data value){
     this->_value = value;
 }
 
@@ -48,4 +54,14 @@ void Vertex<Data>::setDistance(int distance) {
 template <class Data>
 int Vertex<Data>::getDistance() {
     return this->_distance;
+}
+
+template <class Data>
+bool Vertex<Data>::isVisited() {
+    return this->_visited;
+}
+
+template <class Data>
+void Vertex<Data>::visited() {
+    this->_visited = true;
 }

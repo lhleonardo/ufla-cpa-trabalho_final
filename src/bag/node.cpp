@@ -8,9 +8,9 @@ class Node {
     private:
         Node<Data>* _left;
         Node<Data>* _right;
-        Data _value;
+        const Data _value;
     public:
-        Node(Data value);
+        Node(const Data value);
         ~Node();
         
         void setLeftNode(Node<Data>* left);
@@ -20,7 +20,7 @@ class Node {
         Node<Data>* getRightNode();
 
         Data getValue();
-        void setValue(Data value);
+        void setValue(const Data value);
     
         void printNode(std::string location);
 };
@@ -29,12 +29,12 @@ template <class Data>
 class NodeRoot {
     private:
         Node<Data>* _next;
-        Data _value;
+        const Data _value;
     public:
-        NodeRoot(Data value, Node<Data>* next);
+        NodeRoot(const Data value, Node<Data>* next);
         ~NodeRoot();
 
-        void setValue(Data value);
+        void setValue(const Data value);
         void setNext(Node<Data>* next);
         
         Data getValue();
@@ -48,7 +48,7 @@ class NodeRoot {
 #endif
 
 template <class Data>
-Node<Data>::Node(Data value) {
+Node<Data>::Node(const Data value) {
     this->_value = value;
     this->_left = nullptr;
     this->_right = nullptr;
@@ -87,7 +87,7 @@ Data Node<Data>::getValue() {
 }
 
 template <class Data>
-void Node<Data>::setValue(Data value) {
+void Node<Data>::setValue(const Data value) {
     this->_value = value;
 }
 
@@ -103,7 +103,7 @@ void Node<Data>::printNode(std::string location){
 }
 
 template<class Data>
-NodeRoot<Data>::NodeRoot(Data value, Node<Data>* next) {
+NodeRoot<Data>::NodeRoot(const Data value, Node<Data>* next) {
     this->_next = next;
     this->_value = value;
 }
@@ -114,7 +114,7 @@ NodeRoot<Data>::~NodeRoot() {
 }
 
 template<class Data>
-void NodeRoot<Data>::setValue(Data value){
+void NodeRoot<Data>::setValue(const Data value){
     this->_value = value;
 }
 
