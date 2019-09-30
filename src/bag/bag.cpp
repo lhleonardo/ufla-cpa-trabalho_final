@@ -7,11 +7,11 @@
 template <class Data> 
 class Bag {
     private:
-        NodeRoot<const Data>** _backbone;
+        NodeRoot<Data>** _backbone;
         unsigned _lengthBackbone;
         unsigned _size;
 
-        void getSectionAux(Node<const Data>* index, std::list<const Data>* lista);
+        void getSectionAux(Node<Data>* index, std::list<Data>* lista);
     public: 
         Bag(unsigned size);
         ~Bag();
@@ -21,7 +21,7 @@ class Bag {
 
         bool isEmpty();
 
-        std::list<const Data>* getSection(unsigned index);
+        std::list<Data>* getSection(unsigned index);
 
         unsigned size();
 };
@@ -40,7 +40,7 @@ Bag<Data>::Bag(unsigned size) {
     this->_size = size;
     this->_lengthBackbone = ceil(log2(this->_size)) + 1;
 
-    this->_backbone = new NodeRoot<const Data>*[this->_lengthBackbone];
+    this->_backbone = new NodeRoot<Data>*[this->_lengthBackbone];
 
     for (unsigned i = 0; i < this->_lengthBackbone; i++)
         this->_backbone[i] = nullptr;
@@ -48,14 +48,14 @@ Bag<Data>::Bag(unsigned size) {
 
 template<class Data>
 void Bag<Data>::insert(const Data value) {
-    NodeRoot<const Data>* newValue = new NodeRoot<const Data>(value, nullptr);
+    NodeRoot<Data>* newValue = new NodeRoot<Data>(value, nullptr);
 
     for(unsigned i = 0; i < this->_lengthBackbone; i++) {
         if (this->_backbone[i] == nullptr) {
             this->_backbone[i] = newValue;
             break;
         } else {
-            NodeRoot<const Data>* temp = this->_backbone[i]->merge(newValue);
+            NodeRoot<Data>* temp = this->_backbone[i]->merge(newValue);
             
             newValue->setNext(nullptr);
             delete newValue;
@@ -87,7 +87,7 @@ bool Bag<Data>::isEmpty(){
 }
 
 template <class Data>
-void Bag<Data>::getSectionAux(Node<const Data>* index, std::list<const Data>* lista){
+void Bag<Data>::getSectionAux(Node<Data>* index, std::list<Data>* lista){
     if(index){	
         lista->push_back(index->getValue());
 		getSectionAux(index->getLeftNode(), lista);
@@ -96,16 +96,16 @@ void Bag<Data>::getSectionAux(Node<const Data>* index, std::list<const Data>* li
 }
 
 template <class Data>
-std::list<const Data>* Bag<Data>::getSection(unsigned index) { 
+std::list<Data>* Bag<Data>::getSection(unsigned index) { 
     if (this->_backbone[index]) {
         // cria uma lista com o conteudo corrente da pennant
-        std::list<const Data>* lista = new std::list<const Data>();
+        std::list<Data>* lista = new std::list<Data>();
         
         // adiciona a raiz da pennant na listagem
         lista->push_back(this->_backbone[index]->getValue());
         
         // adiciona os outros elementos da pennant na listagem (recursiva)
-        Node<const Data>* root = this->_backbone[index]->getNext();
+        Node<Data>* root = this->_backbone[index]->getNext();
         getSectionAux(root, lista);
 
         // retorna a listagem

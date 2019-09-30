@@ -24,26 +24,27 @@ class Graph{
 
 template <class Data>
 void Graph<Data>::add(const Data value) {
-    this->_elements[value] = Vertex<Data>(value);
+    Vertex<Data> element(value);
+    _elements[value] = element;
 }
 
 template <class Data>
 void Graph<Data>::buildEdge(const Data from, const Data to, unsigned weight) {
-    Vertex<Data> vertexFrom = this->_elements[from];
-    Vertex<Data> vertexTo = this->_elements[to];
+    Vertex<Data> vertexFrom = _elements[from];
+    Vertex<Data> vertexTo = _elements[to];
 
-    this->_mapping[vertexFrom][vertexTo] = weight;
+    _mapping[vertexFrom][vertexTo] = weight;
 }
 
 template <class Data>
 void Graph<Data>::applyBFS(const Data origin) {
-    Vertex<Data>& originVertex = this->_elements[origin];
+    Vertex<Data> originVertex = _elements[origin];
     // marca vertice inicial como visitado
     originVertex.visited();
 
     // tamanho máximo da bag de entrada e saída é a quantidade de vértices do grafo 
-    Bag<Vertex<Data>>* inBag = new Bag<Vertex<Data>>(this->_elements.size());
-    Bag<Vertex<Data>>* outBag = new Bag<Vertex<Data>>(this->_elements.size());
+    Bag<Vertex<Data>>* inBag = new Bag<Vertex<Data>>(_elements.size());
+    Bag<Vertex<Data>>* outBag = new Bag<Vertex<Data>>(_elements.size());
 
     inBag->insert(originVertex);
 
@@ -58,10 +59,9 @@ void Graph<Data>::applyBFS(const Data origin) {
             if (not currentSection) continue;
 
             // percorre os elementos de cada pennant
-            for (Vertex<Data> vertex : *currentSection) {
-
+            for (Vertex<Data> vertex : (*currentSection)) {
                 // pega os adjacentes de um elemento na pennant
-                map<Vertex<Data>, int> adjacentsMapping = this->_mapping[vertex];
+                map<Vertex<Data>, int> adjacentsMapping = _mapping[vertex];
                 for (auto const& tupla : adjacentsMapping) {
                     Vertex<Data> adjacent = tupla.first;
                     if (not adjacent.isVisited()) {
@@ -74,9 +74,10 @@ void Graph<Data>::applyBFS(const Data origin) {
         }
         delete inBag;
         inBag = outBag;
-        outBag = new Bag<Vertex<Data>>(this->_elements.size());
+        outBag = new Bag<Vertex<Data>>(_elements.size());
     }
 
+    cout << "TErminou" << endl;
     // make search...
 }
 

@@ -8,13 +8,11 @@ using namespace std;
 template<class Data>
 class Vertex{
     private:
-        const Data _value;
-
+        Data _value;
         int _distance;
-
         bool _visited;
     public:
-
+        Vertex();
         Vertex(const Data value);
 
         Data getValue();
@@ -26,9 +24,18 @@ class Vertex{
         bool isVisited();
 
         void visited();
+
+        bool operator<(const Vertex<Data>& other) const {
+            return this->_value < other._value;
+        }
 };
 
 #endif
+
+template <class Data>
+Vertex<Data>::Vertex() {
+    this->_distance = -1;
+}
 
 template <class Data>
 Vertex<Data>::Vertex(const Data value) {
