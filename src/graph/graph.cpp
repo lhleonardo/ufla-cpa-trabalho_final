@@ -18,6 +18,8 @@ class Graph{
         void buildEdge(const Data from, const Data to, unsigned weight);
 
         void applyBFS(Data origin);
+
+        void print();
 };
 
 #endif
@@ -39,8 +41,6 @@ void Graph<Data>::buildEdge(const Data from, const Data to, unsigned weight) {
 template <class Data>
 void Graph<Data>::applyBFS(const Data origin) {
     Vertex<Data> originVertex = _elements[origin];
-    // marca vertice inicial como visitado
-    originVertex.visited();
 
     // tamanho máximo da bag de entrada e saída é a quantidade de vértices do grafo 
     Bag<Vertex<Data>>* inBag = new Bag<Vertex<Data>>(_elements.size());
@@ -51,33 +51,48 @@ void Graph<Data>::applyBFS(const Data origin) {
     unsigned layer = 0;
 
     while (not inBag->isEmpty()) {
+        cout << "Passei aqui?" << endl;
+        cout << "Tamanho da bag: " << inBag->size() << endl;
         // percorre cada indice do backbone 
         for (unsigned index = 0; index <= floor(log2(inBag->size())); index++) {
             // elementos da pennant atual
             std::list<Vertex<Data>>* currentSection = inBag->getSection(index);
 
             if (not currentSection) continue;
-
             // percorre os elementos de cada pennant
             for (Vertex<Data> vertex : (*currentSection)) {
                 // pega os adjacentes de um elemento na pennant
+                vertex.visited();
                 map<Vertex<Data>, int> adjacentsMapping = _mapping[vertex];
+                cout << "Vertice: " << vertex.getValue() << endl;
+                cout << "Adjacentes: " << endl;
                 for (auto const& tupla : adjacentsMapping) {
                     Vertex<Data> adjacent = tupla.first;
+                    cout << adjacent.getValue() << " ";
                     if (not adjacent.isVisited()) {
                         adjacent.visited();
                         adjacent.setDistance(layer + 1);
                         outBag->insert(adjacent);
                     }
                 }
+                cout << endl;
             }
         }
+
+        int x;
+        cin >> x;
         delete inBag;
         inBag = outBag;
         outBag = new Bag<Vertex<Data>>(_elements.size());
     }
-
-    cout << "TErminou" << endl;
     // make search...
+}
+
+template <class Data>
+void Graph<Data>::print() {
+    for (auto const &tupla : _elements) {
+        Vertex<Data> vertex = tupla.second;
+        cout << "(" << vertex.getValue() << ":" << vertex.getDistance() << ")" << endl;
+    }
 }
 

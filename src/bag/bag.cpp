@@ -37,8 +37,8 @@ Bag<Data>::~Bag() {
 
 template<class Data>
 Bag<Data>::Bag(unsigned size) {
-    this->_size = size;
-    this->_lengthBackbone = ceil(log2(this->_size)) + 1;
+    this->_size = 0;
+    this->_lengthBackbone = ceil(log2(size)) + 1;
 
     this->_backbone = new NodeRoot<Data>*[this->_lengthBackbone];
 
@@ -53,6 +53,7 @@ void Bag<Data>::insert(const Data value) {
     for(unsigned i = 0; i < this->_lengthBackbone; i++) {
         if (this->_backbone[i] == nullptr) {
             this->_backbone[i] = newValue;
+            _size++;
             break;
         } else {
             NodeRoot<Data>* temp = this->_backbone[i]->merge(newValue);
@@ -83,7 +84,7 @@ void Bag<Data>::print(){
 
 template<class Data>
 bool Bag<Data>::isEmpty(){
-    return this->_size;
+    return this->_size == 0;
 }
 
 template <class Data>

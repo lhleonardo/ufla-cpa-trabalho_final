@@ -43,6 +43,8 @@ int main() {
 
     grafo.applyBFS(leitura);
 
+    grafo.print();
+
     return 0;
 }
 
