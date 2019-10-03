@@ -12,6 +12,7 @@ class Bag {
         unsigned _size;
 
         void getSectionAux(Node<const Data>* index, std::list<const Data>* lista);
+        NodeRoot<Data>* compare(NodeRoot<Data>* oneNode, NodeRoot<Data>* otherNode, NodeRoot<Data>* aux);
     public: 
         Bag(unsigned size);
         ~Bag();
@@ -19,9 +20,17 @@ class Bag {
         void insert(const Data value);
         void print();
 
+        void unionBag(Bag* oneBag, Bag* otherBag);
+        
+
         bool isEmpty();
 
         std::list<const Data>* getSection(unsigned index);
+
+
+
+
+
 
         unsigned size();
 };
@@ -118,4 +127,51 @@ std::list<const Data>* Bag<Data>::getSection(unsigned index) {
 template <class Data>
 unsigned Bag<Data>::size() {
     return this->_size;
+}
+
+template<class Data>
+NodeRoot<Data>* Bag<Data>::compare(NodeRoot<Data>* oneRoot, NodeRoot<Data>* otherRoot, NodeRoot<Data>* aux){
+    
+    if(oneRoot != nullptr and otherRoot !=nullptr and aux != nullptr){
+        aux = aux->merge(otherRoot);
+        return oneRoot;
+    }
+    else if(oneRoot != nullptr and otherRoot !=nullptr and aux == nullptr){
+        aux = oneRoot;
+        aux = aux->merge(otherRoot);
+        return nullptr;
+    }
+    else if(oneRoot != nullptr and otherRoot == nullptr and aux != nullptr){
+        aux=aux->merge(oneRoot);    
+        return nullptr;
+    }
+    else if(oneRoot == nullptr and otherRoot == nullptr and aux != nullptr){
+        oneRoot = aux;
+        aux = nullptr;
+        return oneRoot;
+    }
+     else if(oneRoot == nullptr and otherRoot != nullptr and aux == nullptr){
+        
+        return otherRoot;
+    }
+    else if(oneRoot != nullptr and otherRoot == nullptr and aux == nullptr){
+        return oneRoot;
+    }
+    else if(oneRoot == nullptr and otherRoot != nullptr and aux != nullptr){
+        aux=aux->merge(otherRoot);
+        return aux;
+    }
+    else{
+        return nullptr;
+    }
+
+     
+}
+
+template <class Data>
+void Bag<Data>::unionBag(Bag<Data>* oneBag, Bag<Data>* otherBag){
+    NodeRoot<Data>* aux = nullptr;
+     for(int i=0, i<this->_lengthBackbone, i++){
+         _backbone[i] = compare(oneBag->_backbone[i], otherBag->_backbone[i], aux);
+     }
 }
