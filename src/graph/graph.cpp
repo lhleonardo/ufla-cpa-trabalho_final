@@ -43,20 +43,21 @@ void Graph<Data>::applyBFS(const Data origin) {
     Vertex<Data>* originVertex = _elements[origin];
 
     // tamanho máximo da bag de entrada e saída é a quantidade de vértices do grafo 
-    Bag<Vertex<Data>*>* inBag = new Bag<Vertex<Data>*>(_elements.size());
-    Bag<Vertex<Data>*>* outBag = new Bag<Vertex<Data>*>(_elements.size());
+    Bag<Vertex<Data>*> inBag(_elements.size());
 
-    inBag->insert(originVertex);
+    inBag.insert(originVertex);
 
     unsigned layer = 0;
 
-    while (not inBag->isEmpty()) {
-        cout << "Nova iteracao!" << endl;
-        cout << "[inBag: " << inBag->size() << ", outBag: " << outBag->size() << "]" << endl;
-        // percorre cada indice do backbone 
-        for (unsigned index = 0; index <= floor(log2(inBag->size())); index++) {
+    while (not inBag.isEmpty()) {
+        // percorre cada indice do backbone
+        
+        Bag<Vertex<Data>*> outBag(_elements.size());
+
+        #pragma omp parallel for reduction(outBag)
+        for (unsigned index = 0; index <= floor(log2(inBag.size())); index++) {
             // elementos da pennant atual
-            std::list<Vertex<Data>*>* currentSection = inBag->getSection(index);
+            std::list<Vertex<Data>*>* currentSection = inBag.getSection(index);
 
             if (not currentSection) continue;
             // percorre os elementos de cada pennant
@@ -65,51 +66,22 @@ void Graph<Data>::applyBFS(const Data origin) {
                 vertex->visit();
                 
                 map<Vertex<Data>*, int> adjacentsMapping = _mapping[vertex];
-                cout << "[Vertice: (" << vertex->getValue() << ", " << vertex->getDistance() << ", ";
 
-                if (vertex->isVisited()) {
-                    cout << "visitado";
-                } else if (vertex->isClosed()) {
-                    cout << "fechado";
-                } else {
-                    cout << "branco";
-                }
-                
-                cout << ", #: " << (vertex) << "), adj: [";
                 for (auto const& tupla : adjacentsMapping) {
                     Vertex<Data>* adjacent = tupla.first;
-                    cout << "(" << adjacent->getValue() << ", " << adjacent->getDistance() << ", " <<  ", #: " << (adjacent)<< ", ";
-
-                    if (adjacent->isVisited()) {
-                        cout << "visitado";
-                    } else if (adjacent->isClosed()) {
-                        cout << "fechado";
-                    } else {
-                        cout << "branco";
-                    }
-                    
                     if (not adjacent->isVisited() and not adjacent->isClosed()) {
-                        cout << ", adicionado";
                         adjacent->visit();
                         adjacent->setDistance(layer + 1);
-                        outBag->insert(adjacent);
-                    } else {
-                        cout << ", nao adicionado";
+                        outBag.insert(adjacent);
                     }
-                    cout << "), ";
                 }
-                cout << "]" << endl;
                 vertex->close();
             }
         }
 
-        cout << "[inBag: " << inBag->size() << ", outBag: " << outBag->size() << "]" << endl;
-        cout << "---------------------------" << endl;
-
         layer++;
-        delete inBag;
+        // delete inBag;
         inBag = outBag;
-        outBag = new Bag<Vertex<Data>*>(_elements.size());
     }
     // make search...
 }

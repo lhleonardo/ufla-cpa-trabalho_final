@@ -37,7 +37,7 @@ class Vertex{
 
 template <class Data>
 Vertex<Data>::Vertex() {
-    this->_distance = -1;
+    this->_distance = 0;
     this->_visited = false;
     this->_closed = false;
 }
@@ -45,7 +45,7 @@ Vertex<Data>::Vertex() {
 template <class Data>
 Vertex<Data>::Vertex(const Data value) {
     this->_value = value;
-    this->_distance = -1;
+    this->_distance = 0;
     this->_visited = false;
     this->_closed = false;
 }
