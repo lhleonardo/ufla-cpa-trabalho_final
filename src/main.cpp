@@ -7,7 +7,7 @@
 using namespace std;
 
 int main() {
-    string caminho = "entrada.txt";
+    string caminho = "dist/entrada.txt";
 
     // cout << "Informe o arquivo de entrada: ";
     // cin >> caminho;
@@ -25,23 +25,25 @@ int main() {
 
     Graph<string> grafo;
 
-    // for (unsigned i = 0; i < quantidade; i++) {
-    //     arquivo >> leitura;
-    //     grafo.add(leitura);
-    // }
+    for (unsigned i = 0; i < quantidade; i++) {
+        arquivo >> leitura;
+        grafo.add(leitura);
+    }
 
-    // arquivo >> quantidade;
+    arquivo >> quantidade;
 
-    // string leitura2;
-    // for (unsigned i = 0; i < quantidade; i++) {
-    //     arquivo >> leitura >> leitura2;
-    //     grafo.buildEdge(leitura, leitura2, 1);
-    // }
+    string leitura2;
+    for (unsigned i = 0; i < quantidade; i++) {
+        arquivo >> leitura >> leitura2;
+        grafo.buildEdge(leitura, leitura2, 1);
+    }
 
-    // // primeiro elemento
-    // arquivo >> leitura;
+    // primeiro elemento
+    arquivo >> leitura;
 
     grafo.applyBFS(leitura);
+
+    grafo.print();
 
     return 0;
 }

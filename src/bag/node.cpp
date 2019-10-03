@@ -8,7 +8,7 @@ class Node {
     private:
         Node<Data>* _left;
         Node<Data>* _right;
-        const Data _value;
+        Data _value;
     public:
         Node(const Data value);
         ~Node();
@@ -29,7 +29,7 @@ template <class Data>
 class NodeRoot {
     private:
         Node<Data>* _next;
-        const Data _value;
+        Data _value;
     public:
         NodeRoot(const Data value, Node<Data>* next);
         ~NodeRoot();
