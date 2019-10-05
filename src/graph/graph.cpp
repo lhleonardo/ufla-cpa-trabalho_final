@@ -48,7 +48,7 @@ void Graph<Data>::buildEdge(const Data from, const Data to, unsigned weight) {
 template <class Data>
 void Graph<Data>::applyBFS(const Data origin) {
     
-    // #pragma omp define reduction(BagReduction: Bag<Vertex<Data>*>: omp_out += omp_in)
+    #pragma omp define reduction(BagReduction: Bag<Vertex<Data>*>: omp_out += omp_in)
     
     Vertex<Data>* originVertex = _elements[origin];
 
@@ -62,7 +62,7 @@ void Graph<Data>::applyBFS(const Data origin) {
 
         unsigned sectionLimit = int(floor(log2(inBag.size())));
 
-        #pragma omp parallel for
+        #pragma omp parallel for 
         for (unsigned index = 0; index < sectionLimit; index++) {
             list<Vertex<Data>*>* section = inBag.getSection(index);
             if (section)
@@ -76,8 +76,7 @@ void Graph<Data>::applyBFS(const Data origin) {
 
 template <class Data>
 void Graph<Data>::proccessSection(std::list<Vertex<Data>*>& section, Bag<Vertex<Data>*>& outBag) {
-
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for (Vertex<Data>* vertex : section) {
         if (not vertex->isVisited()) vertex->visit();
 
@@ -91,18 +90,18 @@ template <class Data>
 void Graph<Data>::proccessAdjacents(Vertex<Data>* vertex, Bag<Vertex<Data>*>& outBag) {
     map<Vertex<Data>*, int> adjacentsMapping = _mapping[vertex];
 
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for (auto const& tupla : adjacentsMapping) { // percorre todos os adjacentes, guardando os não marcados para serem processados
         Vertex<Data>* adjacent = tupla.first;
         
         if (not adjacent->isVisited() and not adjacent->isClosed()) { // guarda apenas vértices não visitados
-            #pragma omp critical
-            {
+            // #pragma omp critical
+            // {
                 adjacent->visit();
                 adjacent->setDistance(vertex->getDistance() + 1); // pertencente a próxima camada
                 outBag.insert(adjacent);
 
-            }
+            // }
         } 
         
     }
