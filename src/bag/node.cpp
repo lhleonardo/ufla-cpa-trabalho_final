@@ -135,8 +135,6 @@ Node<Data>* NodeRoot<Data>::getNext() {
 
 template <class Data>
 NodeRoot<Data>* NodeRoot<Data>::merge(NodeRoot<Data>* another) {
-    Node<Data>* oldNext = another->getNext();
-    
     Node<Data>* next = new Node<Data>(another->getValue());
     next->setLeftNode(another->getNext());
     next->setRightNode(this->_next);

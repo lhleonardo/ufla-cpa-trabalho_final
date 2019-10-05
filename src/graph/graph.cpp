@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <cmath>
+#include <any>
 #include <omp.h>
 
 #include "vertex.cpp"
@@ -14,6 +15,10 @@ class Graph{
     private:
         map<Vertex<Data>*, map<Vertex<Data>*, int>> _mapping;
         map<Data, Vertex<Data>*> _elements;
+
+
+        void proccessSection(std::list<Vertex<Data>*>& section, Bag<Vertex<Data>*>& outBag);
+        void proccessAdjacents(Vertex<Data>* vertex, Bag<Vertex<Data>*>& outBag);
     public:
         void add(const Data value);
         void buildEdge(const Data from, const Data to, unsigned weight);
@@ -24,6 +29,7 @@ class Graph{
 
 #endif
 
+// ----------------------- METHODS IMPLEMENTATION -----------------------------
 template <class Data>
 void Graph<Data>::add(const Data value) {
     Vertex<Data>* element = new Vertex<Data>(value);
@@ -38,52 +44,68 @@ void Graph<Data>::buildEdge(const Data from, const Data to, unsigned weight) {
     _mapping[vertexFrom][vertexTo] = weight;
 }
 
+
 template <class Data>
 void Graph<Data>::applyBFS(const Data origin) {
+    
+    // #pragma omp define reduction(BagReduction: Bag<Vertex<Data>*>: omp_out += omp_in)
+    
     Vertex<Data>* originVertex = _elements[origin];
 
-    // tamanho máximo da bag de entrada e saída é a quantidade de vértices do grafo 
-    Bag<Vertex<Data>*> inBag(_elements.size());
+    Bag<Vertex<Data>*> inBag(_elements.size()); // tamanho máximo definido como qtd de vértices
+    inBag.insert(originVertex); // adiciona primeiro vértice - camada 0
 
-    inBag.insert(originVertex);
+    unsigned layer = 0; // camada 0, vértice inicial
 
-    unsigned layer = 0;
+    while (not inBag.isEmpty()) { // processa todos os níveis. Bag vazia significa sem vértices para explorar
+        Bag<Vertex<Data>*> outBag(_elements.size()); // guarda o próximo nível de exploração
 
-    while (not inBag.isEmpty()) {
-        // percorre cada indice do backbone
-        
-        Bag<Vertex<Data>*> outBag(_elements.size());
+        unsigned sectionLimit = int(floor(log2(inBag.size())));
 
-        #pragma omp parallel for reduction(outBag)
-        for (unsigned index = 0; index <= floor(log2(inBag.size())); index++) {
-            // elementos da pennant atual
-            std::list<Vertex<Data>*>* currentSection = inBag.getSection(index);
-
-            if (not currentSection) continue;
-            // percorre os elementos de cada pennant
-            for (Vertex<Data>* vertex : (*currentSection)) {
-                // pega os adjacentes de um elemento na pennant
-                vertex->visit();
-                
-                map<Vertex<Data>*, int> adjacentsMapping = _mapping[vertex];
-
-                for (auto const& tupla : adjacentsMapping) {
-                    Vertex<Data>* adjacent = tupla.first;
-                    if (not adjacent->isVisited() and not adjacent->isClosed()) {
-                        adjacent->visit();
-                        adjacent->setDistance(layer + 1);
-                        outBag.insert(adjacent);
-                    }
-                }
-                vertex->close();
-            }
+        #pragma omp parallel for
+        for (unsigned index = 0; index < sectionLimit; index++) {
+            list<Vertex<Data>*>* section = inBag.getSection(index);
+            if (section)
+                this->proccessSection(*section, outBag);
         }
 
         layer++;
-        // delete inBag;
         inBag = outBag;
     }
-    // make search...
+}
+
+template <class Data>
+void Graph<Data>::proccessSection(std::list<Vertex<Data>*>& section, Bag<Vertex<Data>*>& outBag) {
+
+    #pragma omp parallel for
+    for (Vertex<Data>* vertex : section) {
+        if (not vertex->isVisited()) vertex->visit();
+
+        proccessAdjacents(vertex, outBag);
+
+        vertex->close();
+    }
+}
+
+template <class Data>
+void Graph<Data>::proccessAdjacents(Vertex<Data>* vertex, Bag<Vertex<Data>*>& outBag) {
+    map<Vertex<Data>*, int> adjacentsMapping = _mapping[vertex];
+
+    #pragma omp parallel for
+    for (auto const& tupla : adjacentsMapping) { // percorre todos os adjacentes, guardando os não marcados para serem processados
+        Vertex<Data>* adjacent = tupla.first;
+        
+        if (not adjacent->isVisited() and not adjacent->isClosed()) { // guarda apenas vértices não visitados
+            #pragma omp critical
+            {
+                adjacent->visit();
+                adjacent->setDistance(vertex->getDistance() + 1); // pertencente a próxima camada
+                outBag.insert(adjacent);
+
+            }
+        } 
+        
+    }
 }
 
 template <class Data>
@@ -94,3 +116,4 @@ void Graph<Data>::print() {
     }
 }
 
+// ----------------------- METHODS IMPLEMENTATION -----------------------------

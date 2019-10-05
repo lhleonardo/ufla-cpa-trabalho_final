@@ -18,21 +18,14 @@ class Bag {
         ~Bag();
 
         void insert(const Data value);
-        void print();
-
-        void unionBag(Bag* oneBag, Bag* otherBag);
-        
-
-        bool isEmpty();
-
-        std::list<Data>* getSection(unsigned index);
-
-
-
-
-
 
         unsigned size();
+        bool isEmpty();
+        
+        Bag<Data>& operator+=(const Bag<Data>& otherBag);
+        void print();
+        
+        std::list<Data>* getSection(unsigned index);
 };
 
 template <class Data>
@@ -161,14 +154,14 @@ NodeRoot<Data>* Bag<Data>::compare(NodeRoot<Data>* oneRoot, NodeRoot<Data>* othe
     else{
         return nullptr;
     }
-
-     
 }
 
 template <class Data>
-void Bag<Data>::unionBag(Bag<Data>* oneBag, Bag<Data>* otherBag){
+Bag<Data>& Bag<Data>::operator+=(const Bag<Data>& otherBag) {
     NodeRoot<Data>* aux = nullptr;
-     for(int i=0, i<this->_lengthBackbone, i++){
-         _backbone[i] = compare(oneBag->_backbone[i], otherBag->_backbone[i], aux);
+     for(int i=0; i < _lengthBackbone; i++){
+         _backbone[i] = compare(_backbone[i], otherBag._backbone[i], aux);
      }
+
+     return *this;
 }
