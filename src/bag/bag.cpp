@@ -121,7 +121,7 @@ unsigned Bag<Data>::size() {
 
 template<class Data>
 NodeRoot<Data>* Bag<Data>::compare(NodeRoot<Data>* oneRoot, NodeRoot<Data>* otherRoot, NodeRoot<Data>* aux){
-    
+    // usado para facilitar manipulação (semelhante a soma binária e o "vai-um" presente)
     if(oneRoot != nullptr and otherRoot !=nullptr and aux != nullptr){
         aux = aux->merge(otherRoot);
         return oneRoot;

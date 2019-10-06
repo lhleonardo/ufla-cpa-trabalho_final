@@ -13,9 +13,8 @@
 template <class Data>
 class Graph{
     private:
-        map<Vertex<Data>*, map<Vertex<Data>*, int>> _mapping;
-        map<Data, Vertex<Data>*> _elements;
-
+        std::map<Vertex<Data>*, std::map<Vertex<Data>*, int>> _mapping;
+        std::map<Data, Vertex<Data>*> _elements;
 
         void proccessSection(std::list<Vertex<Data>*>& section, Bag<Vertex<Data>*>& outBag);
         void proccessAdjacents(Vertex<Data>* vertex, Bag<Vertex<Data>*>& outBag);
@@ -47,9 +46,7 @@ void Graph<Data>::buildEdge(const Data from, const Data to, unsigned weight) {
 
 template <class Data>
 void Graph<Data>::applyBFS(const Data origin) {
-    
-    #pragma omp define reduction(BagReduction: Bag<Vertex<Data>*>: omp_out += omp_in)
-    
+ 
     Vertex<Data>* originVertex = _elements[origin];
 
     Bag<Vertex<Data>*> inBag(_elements.size()); // tamanho máximo definido como qtd de vértices
@@ -62,7 +59,7 @@ void Graph<Data>::applyBFS(const Data origin) {
 
         unsigned sectionLimit = int(floor(log2(inBag.size())));
 
-        #pragma omp parallel for 
+        #pragma omp parallel for
         for (unsigned index = 0; index < sectionLimit; index++) {
             list<Vertex<Data>*>* section = inBag.getSection(index);
             if (section)
@@ -77,7 +74,9 @@ void Graph<Data>::applyBFS(const Data origin) {
 template <class Data>
 void Graph<Data>::proccessSection(std::list<Vertex<Data>*>& section, Bag<Vertex<Data>*>& outBag) {
     // #pragma omp parallel for
-    for (Vertex<Data>* vertex : section) {
+    for (std::list<Vertex<Data>*>::iterator it = section.begin(); it != section.end(); it++) {
+        Vertex<Data>* vertex = *it;
+        
         if (not vertex->isVisited()) vertex->visit();
 
         proccessAdjacents(vertex, outBag);
@@ -88,22 +87,23 @@ void Graph<Data>::proccessSection(std::list<Vertex<Data>*>& section, Bag<Vertex<
 
 template <class Data>
 void Graph<Data>::proccessAdjacents(Vertex<Data>* vertex, Bag<Vertex<Data>*>& outBag) {
-    map<Vertex<Data>*, int> adjacentsMapping = _mapping[vertex];
+    std::map<Vertex<Data>*, int> adjacentsMapping = _mapping[vertex];
 
     // #pragma omp parallel for
-    for (auto const& tupla : adjacentsMapping) { // percorre todos os adjacentes, guardando os não marcados para serem processados
-        Vertex<Data>* adjacent = tupla.first;
+    for (std::map<Vertex<Data>*, int>::iterator it = adjacentsMapping.begin(); 
+        it != adjacentsMapping.end(); it++) {
         
-        if (not adjacent->isVisited() and not adjacent->isClosed()) { // guarda apenas vértices não visitados
-            // #pragma omp critical
-            // {
+        Vertex<Data>* adjacent = it->first;
+
+        #pragma omp critical
+        {
+            if (not adjacent->isVisited() and not adjacent->isClosed()) { // guarda apenas vértices não visitados
                 adjacent->visit();
                 adjacent->setDistance(vertex->getDistance() + 1); // pertencente a próxima camada
                 outBag.insert(adjacent);
 
-            // }
+            }
         } 
-        
     }
 }
 
