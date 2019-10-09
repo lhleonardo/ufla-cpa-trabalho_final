@@ -6,8 +6,14 @@
 
 using namespace std;
 
-int main() {
-    string caminho = "dist/entrada.txt";
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        cerr << "Utilização: " << argv[0] << " INPUT" << endl;
+        cerr << "\t- INPUT: arquivo de mapeamento dos vértices" << endl;
+
+        exit(EXIT_FAILURE);
+    }
+    string caminho = argv[1];
 
     // cout << "Informe o arquivo de entrada: ";
     // cin >> caminho;

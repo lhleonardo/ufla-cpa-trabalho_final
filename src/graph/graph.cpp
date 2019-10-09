@@ -1,5 +1,6 @@
 #include <iostream>
 #include <map>
+#include <list>
 #include <cmath>
 #include <any>
 #include <omp.h>
@@ -16,7 +17,7 @@ class Graph{
         std::map<Vertex<Data>*, std::map<Vertex<Data>*, int>> _mapping;
         std::map<Data, Vertex<Data>*> _elements;
 
-        void proccessSection(std::list<Vertex<Data>*>& section, Bag<Vertex<Data>*>& outBag);
+        void proccessSection(std::list<Vertex<Data>*>* section, Bag<Vertex<Data>*>& outBag);
         void proccessAdjacents(Vertex<Data>* vertex, Bag<Vertex<Data>*>& outBag);
     public:
         void add(const Data value);
@@ -49,39 +50,39 @@ void Graph<Data>::applyBFS(const Data origin) {
  
     Vertex<Data>* originVertex = _elements[origin];
 
-    Bag<Vertex<Data>*> inBag(_elements.size()); // tamanho máximo definido como qtd de vértices
-    inBag.insert(originVertex); // adiciona primeiro vértice - camada 0
-
-    unsigned layer = 0; // camada 0, vértice inicial
-
-    while (not inBag.isEmpty()) { // processa todos os níveis. Bag vazia significa sem vértices para explorar
-        Bag<Vertex<Data>*> outBag(_elements.size()); // guarda o próximo nível de exploração
-
-        unsigned sectionLimit = int(floor(log2(inBag.size())));
+    Bag<Vertex<Data>*>* inBag = new Bag<Vertex<Data>*>(_elements.size()); // tamanho máximo definido como qtd de vértices
+    Bag<Vertex<Data>*>* outBag = new Bag<Vertex<Data>*>(_elements.size()); // guarda o próximo nível de exploração
+    
+    inBag->insert(originVertex); // adiciona primeiro vértice - camada 0
+    while (not inBag->isEmpty()) { // processa todos os níveis. Bag vazia significa sem vértices para explorar
+        unsigned sectionLimit = int(ceil(log2(inBag->size()+1)));
 
         #pragma omp parallel for
         for (unsigned index = 0; index < sectionLimit; index++) {
-            list<Vertex<Data>*>* section = inBag.getSection(index);
+            list<Vertex<Data>*>* section = inBag->getSection(index);
             if (section)
-                this->proccessSection(*section, outBag);
+                this->proccessSection(section, *outBag);
         }
 
-        layer++;
+        delete inBag;
         inBag = outBag;
+        outBag = new Bag<Vertex<Data>*>(_elements.size());
     }
 }
 
 template <class Data>
-void Graph<Data>::proccessSection(std::list<Vertex<Data>*>& section, Bag<Vertex<Data>*>& outBag) {
-    // #pragma omp parallel for
-    for (std::list<Vertex<Data>*>::iterator it = section.begin(); it != section.end(); it++) {
-        Vertex<Data>* vertex = *it;
-        
-        if (not vertex->isVisited()) vertex->visit();
+void Graph<Data>::proccessSection(list<Vertex<Data>*>* section, Bag<Vertex<Data>*>& outBag) {
 
-        proccessAdjacents(vertex, outBag);
+    #pragma omp parallel 
+    for (typename list<Vertex<Data>*>::iterator it = section->begin(); it != section->end(); it++) {    
+        #pragma omp single nowait 
+        {
+            if (not (*it)->isVisited()) (*it)->visit();
 
-        vertex->close();
+            proccessAdjacents((*it), outBag);
+
+            (*it)->close();
+        }
     }
 }
 
@@ -89,21 +90,23 @@ template <class Data>
 void Graph<Data>::proccessAdjacents(Vertex<Data>* vertex, Bag<Vertex<Data>*>& outBag) {
     std::map<Vertex<Data>*, int> adjacentsMapping = _mapping[vertex];
 
-    // #pragma omp parallel for
-    for (std::map<Vertex<Data>*, int>::iterator it = adjacentsMapping.begin(); 
+    #pragma omp parallel
+    for (typename std::map<Vertex<Data>*, int>::iterator it = adjacentsMapping.begin(); 
         it != adjacentsMapping.end(); it++) {
         
-        Vertex<Data>* adjacent = it->first;
-
-        #pragma omp critical
+        #pragma omp single nowait
         {
-            if (not adjacent->isVisited() and not adjacent->isClosed()) { // guarda apenas vértices não visitados
-                adjacent->visit();
-                adjacent->setDistance(vertex->getDistance() + 1); // pertencente a próxima camada
-                outBag.insert(adjacent);
+            Vertex<Data>* adjacent = it->first;
 
+            #pragma omp critical
+            {
+                if (not adjacent->isVisited() and not adjacent->isClosed()) { // guarda apenas vértices não visitados
+                    adjacent->visit();
+                    adjacent->setDistance(vertex->getDistance() + 1); // pertencente a próxima camada
+                    outBag.insert(adjacent);
+                }
             }
-        } 
+        }
     }
 }
 

@@ -11,7 +11,7 @@ class Node {
         Data _value;
     public:
         Node(const Data value);
-        ~Node();
+        // ~Node();
         
         void setLeftNode(Node<Data>* left);
         void setRightNode(Node<Data>* right);
@@ -32,7 +32,7 @@ class NodeRoot {
         Data _value;
     public:
         NodeRoot(const Data value, Node<Data>* next);
-        ~NodeRoot();
+        // ~NodeRoot();
 
         void setValue(const Data value);
         void setNext(Node<Data>* next);
@@ -55,11 +55,11 @@ Node<Data>::Node(const Data value) {
 
 }
 
-template <class Data>
-Node<Data>::~Node() {
-    delete this->_left;
-    delete this->_right;
-}
+// template <class Data>
+// Node<Data>::~Node() {
+//     delete this->_left;
+//     delete this->_right;
+// }
 
 template <class Data>
 void Node<Data>::setLeftNode(Node<Data>* left) {
@@ -108,10 +108,10 @@ NodeRoot<Data>::NodeRoot(const Data value, Node<Data>* next) {
     this->_value = value;
 }
 
-template <class Data>
-NodeRoot<Data>::~NodeRoot() {
-    delete this->_next;
-}
+// template <class Data>
+// NodeRoot<Data>::~NodeRoot() {
+//     delete this->_next;
+// }
 
 template<class Data>
 void NodeRoot<Data>::setValue(const Data value){

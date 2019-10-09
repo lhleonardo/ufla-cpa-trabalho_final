@@ -96,7 +96,7 @@ void Bag<Data>::getSectionAux(Node<Data>* index, std::list<Data>* lista){
 
 template <class Data>
 std::list<Data>* Bag<Data>::getSection(unsigned index) { 
-    if (this->_backbone[index]) {
+    if (index < this->_lengthBackbone and this->_backbone[index]) {
         // cria uma lista com o conteudo corrente da pennant
         std::list<Data>* lista = new std::list<Data>();
         
