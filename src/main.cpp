@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
     arquivo >> leitura;
 
     grafo.applyBFS(leitura);
-
+    cout << "Vou imprimir" << endl;
     grafo.print();
 
     return 0;
