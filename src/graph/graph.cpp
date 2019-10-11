@@ -5,6 +5,7 @@
 #include <cmath>
 #include <any>
 #include <omp.h>
+#include <queue>
 
 #include "vertex.cpp"
 #include "../bag/bag.cpp"
@@ -25,6 +26,7 @@ class Graph{
         void add(const Data value);
         void buildEdge(const Data from, const Data to, unsigned weight);
 
+        void applySerialBFS(Data origin);
         void applyBFS(Data origin);
         void print();
 };
@@ -60,6 +62,29 @@ void Graph<Data>::buildEdge(const Data from, const Data to, unsigned weight) {
 
     _mapping[vertexFrom][vertexTo] = weight;
 }
+
+template <class Data>
+void Graph<Data> :: applySerialBFS(const Data origin){
+    Vertex<Data>* originVertex = _elements[origin]; //vértice inicial
+
+    queue<Vertex<Data>*> myQueue;
+    myQueue.push(originVertex);
+    originVertex->setDistance(0);
+
+    while(not myQueue.empty()){
+        for (auto const &tupla : _mapping[myQueue.front()]) {//percorre os elementos adjacentes a cada vértice na fila
+            Vertex<Data>* previousVertex = myQueue.front();
+            Vertex<Data>* vertex = tupla.first;
+            if (not vertex->isVisited()){ //Caso o vértice seja nao visitado, vertice = visitado
+                vertex->visit();
+                vertex->setDistance(previousVertex->getDistance()+1); //guarda a camada em que o vértice foi visitado
+                myQueue.push(vertex);      
+            }
+        }
+        myQueue.pop();
+    }
+}
+
 
 
 template <class Data>
