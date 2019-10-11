@@ -30,6 +30,12 @@ class Bag {
 
 template <class Data>
 Bag<Data>::~Bag() {
+    for (unsigned i = 0; i < _lengthBackbone; i++) {
+        if (_backbone[i]) {
+            delete _backbone[i];
+        }
+    }
+
     delete[] _backbone;
 }
 

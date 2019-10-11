@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <list>
+#include <vector>
 #include <cmath>
 #include <any>
 #include <omp.h>
@@ -20,6 +21,7 @@ class Graph{
         void proccessSection(std::list<Vertex<Data>*>* section, Bag<Vertex<Data>*>& outBag);
         void proccessAdjacents(Vertex<Data>* vertex, Bag<Vertex<Data>*>& outBag);
     public:
+        ~Graph();
         void add(const Data value);
         void buildEdge(const Data from, const Data to, unsigned weight);
 
@@ -30,6 +32,21 @@ class Graph{
 #endif
 
 // ----------------------- METHODS IMPLEMENTATION -----------------------------
+template<class Data>
+Graph<Data>::~Graph() {
+    std::vector<Vertex<Data>*> vertexes;
+    for (auto &tupla : this->_elements) {
+        vertexes.push_back(tupla.second);
+    }
+
+    for (unsigned int i = 0; i < vertexes.size(); i++)
+        delete vertexes[i];
+    
+    vertexes.clear();
+    this->_mapping.clear();
+    this->_elements.clear();
+}
+
 template <class Data>
 void Graph<Data>::add(const Data value) {
     Vertex<Data>* element = new Vertex<Data>(value);
@@ -114,7 +131,9 @@ template <class Data>
 void Graph<Data>::print() {
     for (auto const &tupla : _elements) {
         Vertex<Data>* vertex = tupla.second;
-        cout << "(" << vertex->getValue() << ":" << vertex->getDistance() << ")" << endl;
+        if(vertex->getDistance()>0){
+            cout << "(" << vertex->getValue() << ":" << vertex->getDistance() << ")" << endl;
+        }
     }
 }
 
