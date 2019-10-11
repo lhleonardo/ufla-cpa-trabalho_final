@@ -132,23 +132,21 @@ template <class Data>
 void Graph<Data>::proccessAdjacents(Vertex<Data>* vertex, Bag<Vertex<Data>*>& outBag) {
     std::map<Vertex<Data>*, int> adjacentsMapping = _mapping[vertex];
 
-    #pragma omp parallel
+    #pragma omp parallel 
     for (typename std::map<Vertex<Data>*, int>::iterator it = adjacentsMapping.begin(); 
         it != adjacentsMapping.end(); it++) {
-        
-        #pragma omp single nowait
-        {
-            Vertex<Data>* adjacent = it->first;
-
-            #pragma omp critical
+            #pragma omp single nowait 
             {
-                if (not adjacent->isVisited() and not adjacent->isClosed()) { // guarda apenas vértices não visitados
-                    adjacent->visit();
-                    adjacent->setDistance(vertex->getDistance() + 1); // pertencente a próxima camada
-                    outBag.insert(adjacent);
+                Vertex<Data>* adjacent = it->first;
+                #pragma omp critical
+                {
+                    if (not adjacent->isVisited() and not adjacent->isClosed()) { // guarda apenas vértices não visitados
+                        adjacent->visit();
+                        adjacent->setDistance(vertex->getDistance() + 1); // pertencente a próxima camada
+                        outBag.insert(adjacent);
+                    }
                 }
             }
-        }
     }
 }
 
