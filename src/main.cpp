@@ -38,17 +38,18 @@ int main(int argc, char* argv[]) {
 
     arquivo >> quantidade;
 
+    cout << quantidade << endl;
+
     string leitura2;
     for (unsigned i = 0; i < quantidade; i++) {
         arquivo >> leitura >> leitura2;
         grafo.buildEdge(leitura, leitura2, 1);
+        // arquivo >> leitura;
     }
 
     // primeiro elemento
     arquivo >> leitura;
-
     grafo.applyBFS(leitura);
-    cout << "Vou imprimir" << endl;
     grafo.print();
 
     return 0;
